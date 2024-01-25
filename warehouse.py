@@ -1,5 +1,7 @@
 import numpy as np
 
+from matplotlib import pyplot as plt
+
 
 class Warehouse:
     def __init__(
@@ -61,3 +63,42 @@ class Warehouse:
                 space[from_cell_index][to_cell_index] = 0
                 space[to_cell_index][from_cell_index] = 0
         return space
+
+    def draw(self,):
+        # plt.figure(figsize=(self.width, self.height))
+        fig, ax = plt.subplots(1, 1, tight_layout=True)
+        for x in range(self.width * self.height):
+            for y in range(self.width * self.height):
+                if not self.actions[x][y]:
+                    row = x // self.width
+                    col = x % self.width
+                    if y - x == 1:
+                        self.draw_right(ax, row, col)
+                    elif y - x == self.width:
+                        self.draw_under(ax, row, col)
+        plt.xlim([0, self.width])
+        plt.ylim([0, self.height])
+        plt.show()
+
+    def draw_right(self, ax, row, col):
+        y_min = (self.height - row - 1)
+        y_max = (self.height - row)
+        x = col + 1
+        ax.axvline(
+            x,
+            lw=2,
+            ymin=y_min / self.height,
+            ymax=y_max / self.height,
+        )
+
+    def draw_under(self, ax, row, col):
+        x_min = col
+        x_max = x_min + 1
+        ax.axhline(
+            self.height - (row + 1),
+            lw=2,
+            c='r',
+            xmin=x_min / self.width,
+            xmax=x_max / self.width,
+        )
+
