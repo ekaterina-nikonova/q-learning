@@ -1,6 +1,7 @@
 import numpy as np
 
 from matplotlib import pyplot as plt
+from matplotlib.font_manager import FontProperties
 
 
 class Warehouse:
@@ -65,8 +66,9 @@ class Warehouse:
         return space
 
     def draw(self,):
-        # plt.figure(figsize=(self.width, self.height))
         fig, ax = plt.subplots(1, 1, tight_layout=True)
+        plt.xticks([])
+        plt.yticks([])
         for x in range(self.width * self.height):
             for y in range(self.width * self.height):
                 if not self.actions[x][y]:
@@ -76,6 +78,16 @@ class Warehouse:
                         self.draw_right(ax, row, col)
                     elif y - x == self.width:
                         self.draw_under(ax, row, col)
+
+        for cell_num in range(self.width * self.height):
+            row = cell_num // self.width
+            col = cell_num % self.width
+            x = col + 0.5
+            y = (self.height - row) - 0.5
+            font = FontProperties()
+            font.set_size(fig.bbox.xmax / (self.width * 5))
+            alignment = {'horizontalalignment': 'center', 'verticalalignment': 'center'}
+            plt.text(x, y, str(cell_num), fontproperties=font, **alignment)
         plt.xlim([0, self.width])
         plt.ylim([0, self.height])
         plt.show()
@@ -97,7 +109,6 @@ class Warehouse:
         ax.axhline(
             self.height - (row + 1),
             lw=2,
-            c='r',
             xmin=x_min / self.width,
             xmax=x_max / self.width,
         )
