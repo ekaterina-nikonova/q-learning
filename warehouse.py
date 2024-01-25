@@ -10,6 +10,7 @@ class Warehouse:
         *,
         width: int = None,
         height: int = None,
+        num_of_walls: int = None,
     ):
         if width is None:
             width = 4
@@ -20,7 +21,12 @@ class Warehouse:
         self._width = width
         self._height = height
 
-        self._walls = self.build_walls()
+        if num_of_walls is None:
+            self.num_of_walls = int(self.width * self.height * 0.25)
+        else:
+            self.num_of_walls = num_of_walls
+
+        self._actions = self.build_actions()
 
     @property
     def width(self):
@@ -32,16 +38,36 @@ class Warehouse:
 
     @property
     def actions(self):
-        return self._walls
+        return self._actions
 
-    def build_walls(self):
+    def build_actions(self):
         num_actions = self.width * self.height
-        space = np.ones((num_actions, num_actions), np.int8)
+        space = np.zeros((num_actions, num_actions), np.int8)
 
-        num_of_walls = int(self.width * self.height * 0.25)
+        for position in range(num_actions):
+            above = position - self.width
+            below = position + self.width
+            left = position - 1
+            right = position + 1
 
-        walls_right = np.random.choice(num_actions, num_of_walls, replace=False)
-        walls_under = np.random.choice(num_actions, num_of_walls, replace=False)
+            if above > 0:  # not the first row
+                space[position][above] = 1
+                space[above][position] = 1
+
+            if below < num_actions:  # not the last row
+                space[position][below] = 1
+                space[below][position] = 1
+
+            if position % self.width != 0:  # not the first column
+                space[position][left] = 1
+                space[left][position] = 1
+
+            if position % self.width != self.width - 1:  # not the last column
+                space[position][right] = 1
+                space[right][position] = 1
+
+        walls_right = np.random.choice(num_actions, self.num_of_walls, replace=False)
+        walls_under = np.random.choice(num_actions, self.num_of_walls, replace=False)
 
         walls_right = walls_right[walls_right % self.width != self.width - 1]  # exclude the rightmost column
         walls_under = walls_under[walls_under < (self.width * self.height) - self.width]  # exclude the lowest row
