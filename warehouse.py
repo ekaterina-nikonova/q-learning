@@ -35,22 +35,29 @@ class Warehouse:
         num_actions = self.width * self.height
         space = np.ones((num_actions, num_actions), np.int8)
 
-        # Walk the space from left to right, top to bottom and randomly insert walls
-        # to the right and down from the current cell.
-        for row in range(self.height - 1):
-            for column in range(self.width - 1):
-                right = np.random.randint(1) if column < self.width - 1 else 1
-                down = np.random.randint(1) if row < self.height - 1 else 1
+        num_of_walls = int(self.width * self.height * 0.25)
 
-                if not right:
-                    from_cell_index = self.width * row + column
-                    to_cell_index = from_cell_index + 1
-                    space[from_cell_index][to_cell_index] = 0
-                    space[to_cell_index][from_cell_index] = 0
+        walls_right = np.random.choice(num_actions, num_of_walls, replace=False)
+        walls_under = np.random.choice(num_actions, num_of_walls, replace=False)
 
-                if not down:
-                    from_cell_index = self.width * row + column
-                    to_cell_index = self.width * (row + 1) + column
-                    space[from_cell_index][to_cell_index] = 0
-                    space[to_cell_index][from_cell_index] = 0
+        walls_right = walls_right[walls_right % self.width != self.width - 1]  # exclude the rightmost column
+        walls_under = walls_under[walls_under < (self.width * self.height) - self.width]  # exclude the lowest row
+
+        for wall in walls_right:
+            row = wall // self.width
+            column = wall % self.width
+            if column < self.width - 1:
+                from_cell_index = self.width * row + column
+                to_cell_index = from_cell_index + 1
+                space[from_cell_index][to_cell_index] = 0
+                space[to_cell_index][from_cell_index] = 0
+
+        for wall in walls_under:
+            row = wall // self.width
+            column = wall % self.width
+            if row < self.height - 1:
+                from_cell_index = self.width * row + column
+                to_cell_index = self.width * (row + 1) + column
+                space[from_cell_index][to_cell_index] = 0
+                space[to_cell_index][from_cell_index] = 0
         return space
